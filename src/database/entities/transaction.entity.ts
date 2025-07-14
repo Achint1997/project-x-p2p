@@ -82,9 +82,6 @@ export class Transaction {
   @Column({ type: 'varchar', length: 255, nullable: true })
   externalReferenceId: string;
 
-  @Column({ type: 'uuid', nullable: true })
-  parentTransactionId: string;
-
   @Column({ type: 'int', default: 0 })
   retryCount: number;
 
@@ -100,18 +97,11 @@ export class Transaction {
   @Column({ type: 'json', nullable: true })
   errorDetails: Record<string, any>;
 
-  // Saga and compensation fields
+  // Saga state for distributed transaction management
   @Column({ type: 'json', nullable: true })
   sagaState: Record<string, any>;
 
-  @Column({ type: 'json', nullable: true })
-  compensationActions: Array<{
-    action: string;
-    params: Record<string, any>;
-    executedAt?: Date;
-    status: 'pending' | 'executed' | 'failed';
-  }>;
-
+  // Fund reservation for distributed transactions
   @Column({ type: 'decimal', precision: 15, scale: 2, nullable: true })
   reservedAmount: number;
 
@@ -144,10 +134,6 @@ export class Transaction {
   @ManyToOne(() => Wallet, wallet => wallet.incomingTransactions)
   @JoinColumn({ name: 'destinationWalletId' })
   destinationWallet: Wallet;
-
-  @ManyToOne(() => Transaction, { nullable: true })
-  @JoinColumn({ name: 'parentTransactionId' })
-  parentTransaction: Transaction;
 
   // Helper methods
   isInProgress(): boolean {
